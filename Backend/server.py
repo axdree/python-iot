@@ -1,3 +1,4 @@
+from typing import Mapping
 from flask import Flask, render_template, request, session
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
@@ -28,12 +29,19 @@ class Mappings(db.Model):
         self.medicationName = medicationName
 
     id = db.Column(db.Integer, primary_key=True)
-    cylinderNum = db.Column(db.Integer, nullable=False)
+    cylinderNum = db.Column(db.Integer,unique=True, nullable=False)
     medicationName = db.Column(db.String(100), nullable=False)
-    db.UniqueConstraint(cylinderNum)
 
 # create db and tables if don't exist
 db.create_all()
+print("TEST")
+print(Mappings.query.all())
+
+# temp = Mappings(1,"ibuprofen")
+# temp2 = Mappings(2, "paracetamol")
+# db.session.add(temp)
+# db.session.add(temp2)
+# db.session.commit()
 
 # Endpoints
 @app.route("/", methods=["GET"])
@@ -47,7 +55,7 @@ def config():
         timings = requestData['timings']
         medication = requestData['medication']
         dose = requestData['dose']
-        obj = Mappings.query.filter_by(medicationName=medication).first()
+        cylinder = Mappings.query.filter_by(medicationName=medication).first().cylinderNum
     else:
         return "alive"
 
