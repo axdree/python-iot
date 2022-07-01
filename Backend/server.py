@@ -1,6 +1,4 @@
-from typing import Mapping
 from flask import Flask, render_template, request, session
-from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 import time, os
 
@@ -9,7 +7,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///db.sqlite3'
 db = SQLAlchemy(app)
 
-# One time run to setup tables
+# DB and tables
 class Medications(db.Model):
     __tablename__ = 'medications'
     def __init__(self, medicationName, timings, dosage):
@@ -57,6 +55,12 @@ def config():
         dose = requestData['dose']
         cylinder = Mappings.query.filter_by(medicationName=medication).first().cylinderNum
     else:
+        med1 = Mappings.query.filter_by(cylinderNum=1).first().medicationName
+        med2 = Mappings.query.filter_by(cylinderNum=2).first().medicationName
+        med3 = Mappings.query.filter_by(cylinderNum=3).first().medicationName
+        med4 = Mappings.query.filter_by(cylinderNum=4).first().medicationName
+
+
         return "alive"
 
 @app.route("/settings", methods=["GET", "POST"])
