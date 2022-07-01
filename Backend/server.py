@@ -59,8 +59,7 @@ def config():
         med2 = Mappings.query.filter_by(cylinderNum=2).first().medicationName
         med3 = Mappings.query.filter_by(cylinderNum=3).first().medicationName
         med4 = Mappings.query.filter_by(cylinderNum=4).first().medicationName
-
-
+        
         return "alive"
 
 @app.route("/settings", methods=["GET", "POST"])
