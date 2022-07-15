@@ -1,3 +1,5 @@
 Raspberry/RPi
 .DS_Store
 Backend/db.sqlite3
+Backend/.DS_Store
+Raspberry/.DS_Store
