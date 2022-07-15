@@ -115,7 +115,7 @@ def setup():
         newMapping1 = Mappings.query.filter_by(cylinderNum=1).update(dict(stock=stockData['cyl1'], medicationName=mappingData['cyl1']))
         newMapping2 = Mappings.query.filter_by(cylinderNum=2).update(dict(stock=stockData['cyl2'], medicationName=mappingData['cyl2']))
         newMapping3 = Mappings.query.filter_by(cylinderNum=3).update(dict(stock=stockData['cyl3'], medicationName=mappingData['cyl3']))
-        newMapping4 = Mappings.query.filter_by(cylinderNum=4).update(dict(stock=stockData['cyl4'], medicationName=mappingData['cyl4']))
+        newMapping4 = Mappings.query.filter_by(cylinderNum=4).update(dict(stock=stockData['cyl4'], medicationName=mappingData['cyl4'])) 
         db.session.commit()
 
         return redirect(url_for('login'))
