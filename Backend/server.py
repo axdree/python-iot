@@ -44,9 +44,10 @@ class Medications(db.Model):
         
 class Mappings(db.Model):
     __tablename__ = 'mappings'
-    def __init__(self, cylinderNum, medicationName):
+    def __init__(self, cylinderNum, medicationName, stock):
         self.cylinderNum = cylinderNum
         self.medicationName = medicationName
+        self.stock = stock
 
     id = db.Column(db.Integer, primary_key=True)
     cylinderNum = db.Column(db.Integer, unique=True, nullable=False)
@@ -85,6 +86,43 @@ def load_user(user_id):
     return Users.query.get(int(user_id))
 
 # Endpoints
+@app.route("/setup", methods=["GET", "POST"])
+def setup():
+    if request.method == "POST":
+        requestData = request.get_json()
+        print(requestData)
+        uname = requestData['username']
+        pword = requestData['password']
+        phoneNumber = requestData['phoneNumber']
+        mappingData = requestData['mappings']
+        stockData = requestData['stocks']
+
+        user = Users(username=uname, password=generate_password_hash(pword), number=phoneNumber)
+        newMapping1 = Mappings(1, mappingData['cyl1'], int(stockData['cyl1']))
+        newMapping2 = Mappings(2, mappingData['cyl2'], int(stockData['cyl2']))
+        newMapping3 = Mappings(3, mappingData['cyl3'], int(stockData['cyl3']))
+        newMapping4 = Mappings(4, mappingData['cyl4'], int(stockData['cyl4']))
+        # newMapping1 = Mappings.query.filter_by(cylinderNum=1).update(dict(stock=stockData['cyl1'], medicationName=mappingData['cyl1']))
+        # newMapping2 = Mappings.query.filter_by(cylinderNum=2).update(dict(stock=stockData['cyl2'], medicationName=mappingData['cyl2']))
+        # newMapping3 = Mappings.query.filter_by(cylinderNum=3).update(dict(stock=stockData['cyl3'], medicationName=mappingData['cyl3']))
+        # newMapping4 = Mappings.query.filter_by(cylinderNum=4).update(dict(stock=stockData['cyl4'], medicationName=mappingData['cyl4'])) 
+        db.session.add(user)
+        db.session.add(newMapping1)
+        db.session.add(newMapping2)
+        db.session.add(newMapping3)
+        db.session.add(newMapping4)
+        db.session.commit()
+
+        return redirect(url_for('login'))
+
+    else:
+        users = []
+        for user in Users.query.all():
+            users.append(user.__dict__)
+        if users:
+            return redirect(url_for('login'))
+        return render_template("setup.html")
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -100,42 +138,13 @@ def login():
     else:
         return "login page"
 
-@app.route("/setup", methods=["GET", "POST"])
-def setup():
-    if request.method == "POST":
-        requestData = request.get_json()
-        uname = requestData['username']
-        pword = requestData['password']
-        phoneNumber = requestData['phoneNumber']
-        mappingData = requestData['mapping']
-        stockData = requestData['stocks']
-
-        user = Users(username=uname, password=generate_password_hash(pword), number=phoneNumber)
-        db.session.add(user)
-        newMapping1 = Mappings.query.filter_by(cylinderNum=1).update(dict(stock=stockData['cyl1'], medicationName=mappingData['cyl1']))
-        newMapping2 = Mappings.query.filter_by(cylinderNum=2).update(dict(stock=stockData['cyl2'], medicationName=mappingData['cyl2']))
-        newMapping3 = Mappings.query.filter_by(cylinderNum=3).update(dict(stock=stockData['cyl3'], medicationName=mappingData['cyl3']))
-        newMapping4 = Mappings.query.filter_by(cylinderNum=4).update(dict(stock=stockData['cyl4'], medicationName=mappingData['cyl4'])) 
-        db.session.commit()
-
-        return redirect(url_for('login'))
-
-    else:
-        users = []
-        for user in Users.query.all():
-            users.append(user.__dict__)
-        if users:
-            return redirect(url_for('login'))
-        return render_template("")
-
-
 @app.route("/", methods=["GET"])
 @login_required
 def main():
     return "Dashboard"
 
 @app.route("/config", methods=["GET", "POST"])
-@login_required
+# @login_required
 def config():
     if request.method == "POST":
         requestData = request.get_json()
@@ -145,17 +154,23 @@ def config():
         cylinder = Mappings.query.filter_by(medicationName=medication).first().cylinderNum
         try:
             newDose = Medications(cylinder, timings, dose)
-            db.session.add(newDose).commit()
+            db.session.add(newDose)
+            db.session.commit()
+            return {"message": "success"}
         except:
-            flash("Error adding dosage and medication, please check input and try again.")
-            return redirect(url_for('config'))
+            return{"message": "Error adding dosage and medication, please check input and try again."}
+            # flash("Error adding dosage and medication, please check input and try again.")
+            # return redirect(url_for('config'))
     else:
-        med1 = Mappings.query.filter_by(cylinderNum=1).first().medicationName
-        med2 = Mappings.query.filter_by(cylinderNum=2).first().medicationName
-        med3 = Mappings.query.filter_by(cylinderNum=3).first().medicationName
-        med4 = Mappings.query.filter_by(cylinderNum=4).first().medicationName
+        try:
+            med1 = Mappings.query.filter_by(cylinderNum=1).first().medicationName
+            med2 = Mappings.query.filter_by(cylinderNum=2).first().medicationName
+            med3 = Mappings.query.filter_by(cylinderNum=3).first().medicationName
+            med4 = Mappings.query.filter_by(cylinderNum=4).first().medicationName
+        except:
+            med1 = med2 = med3 = med4 = "error"
         
-        return render_template('.html', med1=med1, med2=med2, med3=med3, med4=med4)
+        return render_template('InsertConfig.html', med1=med1, med2=med2, med3=med3, med4=med4)
 
 @app.route("/settings", methods=["GET", "POST"])
 @login_required
@@ -173,7 +188,7 @@ def settings():
         return current_user.number
 
 @app.route("/medsettings", methods=["GET", "POST"])
-@login_required
+# @login_required
 def medSettings():
     if request.method == "POST":
         requestData = request.get_json()
@@ -190,8 +205,9 @@ def medSettings():
         
     else:
         dosage = Medications.query.all()
+        print(Mappings.query.filter_by(cylinderNum=1).first().stock)
         
-        return render_template(".html",
+        return render_template("updateConfig.html",
         stock1=Mappings.query.filter_by(cylinderNum=1).first().stock,
         stock2=Mappings.query.filter_by(cylinderNum=2).first().stock,
         stock3=Mappings.query.filter_by(cylinderNum=3).first().stock,

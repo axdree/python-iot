@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+        crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        button {
+            background: none;
+            color: inherit;
+            border: none;
+            padding: 0;
+            font: inherit;
+            cursor: pointer;
+            outline: inherit;
+        }
+    </style>
+
+</head>
+
+<body>
+    <!-- {time : ['0800' , '1300'] , medication :[ 1,'bloodpressure' ], dose : 2 ,   }
+
+{phonenumber : 12345678, timezome : 'gmt'} -->
+    <div class='container'>
+
+        <h2>Add Medication</h2>
+
+        <form onsubmit='return false ' id='mainform'> </form>
+        <form id="subform"> </form>
+
+
+        <div class="form-row ml-2">
+            <div class="col-md-4 mb-3">
+                <label for="validationDefault01">Medication Name</label>
+                <input type="text" class="form-control"  id="validationDefault01" placeholder="First name"
+                    value="Mark" required form = 'mainform'>
+            </div>
+            
+            
+
+
+
+
+
+            <!-- <div class="col-md-4 mb-3">
+        <label for="validationDefaultUsername">Username</label>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroupPrepend2">@</span>
+          </div>
+          <input type="text" class="form-control" id="validationDefaultUsername" placeholder="Username" aria-describedby="inputGroupPrepend2" required>
+        </div>
+      </div> -->
+        </div>
+            <div class="form-row ml-2">
+
+                
+            <div class="col-md-4 mb-3">
+                <label for="validationDefault02">Medication</label>
+                <select class="form-select" aria-label="Default select example" name ='medication' form = 'mainform' >
+                    <option value="{{ med1 }}">{{ med1 }}</option>
+                    <option value="{{ med2 }}">{{ med2 }}</option>
+                    <option value="{{ med3 }}">{{ med3 }}</option>
+                    <option value="{{ med4 }}">{{ med4 }}</option>
+                </select>
+            </div> 
+
+
+                <div class="col-md-6 mb-3" id='timing'>
+                    <label for="validationDefault03">Timing</label>
+                    <div class='d-flex'>
+                        <input class='form-control' type="time" id="appt" name="appt" min="00:00" max="2359" step=1800 form ='subform'>
+                        <span>
+                            <svg class='remove' xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                                fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                <path
+                                    d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+
+
+
+
+                <div class='d-flex'>
+                    <button type="button" class="btn btn-primary" id='buttonadd'>Add Timing</button>
+
+                </div>
+
+            </div>
+
+        <div class='form-row col-md-4 ml-2 mb-2'>
+
+            <div class="form-group form-check">
+                <label class="form-check-label" for="exampleCheck1">Dose</label>
+                <input type="number" class="form-control" id="exampleCheck1" min = '1' name ='dose'  form = 'mainform'>
+            </div>
+        </div>
+
+
+        <button class="btn btn-primary" id='submitform' type="submit">Submit form</button>
+    </div>
+
+
+    <script>
+
+        $(window).on('load' , function(){
+            for (var i = 0; i <= 23; i++) {
+                $("#timings").append(`<option value="${i}">${i}</option>`)
+    
+            }
+            $("body").on('click', 'button.delbutton', (event) => {
+                $(event.currentTarget).parent().remove()
+            })
+            var counter = 0
+    
+    
+            $("#buttonadd").click(() => {
+                console.log('click');
+                $("#timing").append(`<div class = 'd-flex mt-2'>
+                            <input class='form-control' type="time" id="appt" name="appt${++counter}" min="09:00" max="18:00" step=1800
+                                required form = 'subform'>
+                             <button class = 'delbutton'>
+                                 <span class= 'svg'>
+                                        <svg  xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                          </svg>
+                                 </span>
+                             </button>
+                       </div>`)
+    
+                $(".svg").html($(".svg").html());
+    
+    
+            })
+    
+    
+            $('#submitform').click(() => {
+
+
+                var formdata = new FormData(document.querySelector('#mainform'))
+                console.log(formdata.keys())
+    
+                for (const value of formdata.entries()) {
+                    console.log(value[0] ,value[1]  )
+                }
+                console.log(document.querySelector('#subform'))
+                var subformdata = new FormData(document.querySelector('#subform'))
+                console.log(subformdata.values())
+    
+                var times = []
+                for (const value of subformdata.entries()) {
+                    console.log(value[0] ,value[1]  )
+                    times.push(value[1])
+                }
+                var data = Object.fromEntries(formdata)
+                data['timings'] = times 
+
+                console.log(data)
+                axios.post("/config", data).then(response=>{
+                    console.log(response)
+                    if(response.message){
+                        if(response.message=="success"){
+                            alert("Medication successfully added to schedule")
+                            window.location.reload()
+                        }else{
+                            alert("Error adding medication to schedule")
+                            window.location.reload()
+                        }
+                    }
+                })
+
+
+
+                //config
+                //dashboard 
+                //settings (phone number)
+                //medsettings (mapping between cylinder and medication )
+                //login 
+
+
+    
+            })
+    
+        })
+    
+    
+    
+    </script>
+    
+
+</body>
+
+
+
+</html>
