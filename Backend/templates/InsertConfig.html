@@ -129,7 +129,7 @@
             $("#buttonadd").click(() => {
                 console.log('click');
                 $("#timing").append(`<div class = 'd-flex mt-2'>
-                            <input class='form-control' type="time" id="appt" name="appt${++counter}" min="09:00" max="18:00" step=1800
+                            <input class='form-control' type="time" id="appt" name="appt${++counter}" step=1800
                                 required form = 'subform'>
                              <button class = 'delbutton'>
                                  <span class= 'svg'>
@@ -170,8 +170,8 @@
                 console.log(data)
                 axios.post("/config", data).then(response=>{
                     console.log(response)
-                    if(response.message){
-                        if(response.message=="success"){
+                    if(response.data.message){
+                        if(response.data.message=="success"){
                             alert("Medication successfully added to schedule")
                             window.location.reload()
                         }else{

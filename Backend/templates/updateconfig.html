@@ -32,7 +32,7 @@
 
 {phonenumber : 12345678, timezome : 'gmt'} -->
     <div class='container'>
-        <h2>Settings</h2>
+        <h1>Settings</h1>
 
         <form onsubmit='return false ' id='mainform'> </form>
         <form id="subform"> </form>
@@ -47,10 +47,68 @@
             </div>
         </div>
 
+        <h2 class="pt-5">Current Medications</h2>
+        {{cylinder}}
+        {% for dose in data %}
+
+            <h4>Medication ID: {{dose['id']}}</h4>
+            {{dose['timings']}}
+
+            <div class="col-md-4 mb-3">
+                <label for="validationDefault02">Medication</label>
+                <select class="form-select" aria-label="Default select example" name ='medication' form = 'mainform' >
+                    {% for cyl in cylinder%}
+                    {% if dose['cylinderNum'] == cyl %}
+                    <option value="{{ cylinder[cyl] }}" selected>{{ cylinder[cyl] }}</option>
+                    {% else %}
+                    <option value="{{ cylinder[cyl] }}">{{ cylinder[cyl] }}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </div> 
+            
+            <div class="container">
+                <div class="col-md-6 mb-3" class='timing'>
+                    <label for="validationDefault03">Timing</label>
+                    {% for time in dose['timings'] %}
+                    <div class = 'd-flex mt-2'>
+                        <input class='form-control' type="time" id="appt" name="appt" step=1800
+                            required form = 'subform' value="{{time}}">
+                         <button class = 'delbutton'>
+                             <span class= 'svg'>
+                                    <svg  xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                      </svg>
+                             </span>
+                         </button>
+                   </div>
+                   {% endfor %}
+                </div>
+                <div class='d-flex pt-2'>
+                    <button type="button" class="btn btn-primary buttonadd">Add Timing</button>
+                </div>
+            </div>
+            
+
+            <div class="col-md-4 mb-3">
+                <label class="form-check-label" for="exampleCheck1">Dose</label>
+                <input type="number" class="form-control" id="exampleCheck1" min = '1' name ='dose'  form = 'mainform' value="{{dose['dosage']}}">
+            </div>
+
+            {{dose['cylinderNum']}}
+            {{dose['dosage']}}
+            <br>
+            {% for time in dose['timings']%}
+            {{time}}
+            {% endfor %}
+            <br>
+            {{cylinder[dose['cylinderNum']]}}
+            <br>
+            <br><br>
+        {% endfor %}
 
 
-
-
+        <h2 class="pt-5 pb-3">Cylinder Mappings</h2>
         <div class="form-row row">
 
             <div class='col-3'>
@@ -183,10 +241,11 @@
             var counter = 0
 
 
-            $("#buttonadd").click(() => {
+            $(".buttonadd").click((e) => {
                 console.log('click');
-                $("#timing").append(`<div class = 'd-flex mt-2'>
-                            <input class='form-control' type="time" id="appt" name="appt${++counter}" min="09:00" max="18:00" step=1800
+                console.log($(event.currentTarget).parent().html())
+                $(event.currentTarget).parent().append(`<div class = 'd-flex mt-2'>
+                            <input class='form-control' type="time" id="appt" name="appt${++counter}" step=1800
                                 required form = 'subform'>
                              <button class = 'delbutton'>
                                  <span class= 'svg'>

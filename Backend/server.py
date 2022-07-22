@@ -66,7 +66,6 @@ class Users(UserMixin, db.Model):
     password = db.Column(db.String(100), nullable=False)
     number = db.Column(db.String(25), nullable=False)
 
-
 # create db and tables if don't exist
 db.create_all()
 print(Mappings.query.all())
@@ -213,10 +212,19 @@ def medSettings():
         
     else:
         dosage = Medications.query.all()
-        print(Users.query.filter_by(username=current_user.username).first().number)
+        data = [i.__dict__ for i in dosage]
+        print(data)
+        cyl=Mappings.query.all()
+        cylinderdata=[i.__dict__ for i in cyl]
+        cylinder={}
+        for idx, i in enumerate(cylinderdata):
+            cylinder[idx+1]=i['medicationName']
+        print(cylinder)
         phoneNumber=Users.query.filter_by(username=current_user.username).first().number
 
         return render_template("updateConfig.html",
+        data=data,
+        cylinder=cylinder,
         phoneNumber=phoneNumber,
         stock1=Mappings.query.filter_by(cylinderNum=1).first().stock,
         stock2=Mappings.query.filter_by(cylinderNum=2).first().stock,
