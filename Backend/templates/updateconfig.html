@@ -32,11 +32,20 @@
 
 {phonenumber : 12345678, timezome : 'gmt'} -->
     <div class='container'>
-        <h2>Add Medication</h2>
+        <h2>Settings</h2>
 
         <form onsubmit='return false ' id='mainform'> </form>
         <form id="subform"> </form>
         <form id = 'stockform'></form>
+
+
+        <div class = 'mb-3'>
+            <label for="validationDefault01" class='col-form-label col-2'>Phone Number</label>
+            <div class='col-6'>
+                <input type="number" class="form-control " id="validationDefault01"
+                    placeholder="{{phoneNumber}}" required name='phoneNumber' form='mainform' value = '{{phoneNumber}}'>
+            </div>
+        </div>
 
 
 
@@ -148,7 +157,7 @@
 
 
 
-            <div class="col-md-4 mb-3">
+            <!-- <div class="col-md-4 mb-3">
         <label for="validationDefaultUsername">Username</label>
         <div class="input-group">
           <div class="input-group-prepend">
@@ -202,13 +211,16 @@
     
                 var subformdata = new FormData(document.querySelector('#stockform'))
 
+                var mainform = new FormData(document.querySelector('#mainform'))
+
         
 
 
                 var data = {
                     'stock' : Object.fromEntries(formdata.entries()),
                     'mapping' : Object.fromEntries(subformdata.entries()),
-                    'dosage' : []//add the dosage here
+                    'dosage' : [],//add the dosage here,
+                    'phoneNumber' : Object.fromEntries(mainform.entries())['phoneNumber']
 
                 }
                 

@@ -33,111 +33,42 @@
 {phonenumber : 12345678, timezome : 'gmt'} -->
     <div class='container'>
 
-        <h2>Phone Number for Whatsapp</h2>
+        <h2>Login</h2>
 
-        <form onsubmit='return false ' id='mainform'> </form>
-        <form id="subform"> </form>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="notification is-danger">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+        {% endwith %}
 
-        <form  id = 'stockform'></form>
-
+        <form  id='mainform' action = "/login" method = 'POST'> </form>
+   
 
         <div class="form-group ml-2">
             <div class=" mb-3  row">
-                <label for="validationDefault01" class='col-form-label col-2'>Username </label>
+                <label for="username" class='col-form-label col-2'>Username </label>
                 <div class='col-6'>
-                    <input type="text" class="form-control " id="validationDefau"
+                    <input type="text" class="form-control " id="username"
                         placeholder="" required name='username' form='mainform'>
                 </div>
             </div>
             <div class=" mb-3  row">
-                <label for="validationDefault01" class='col-form-label col-2'>Password</label>
+                <label for="password" class='col-form-label col-2'>Password</label>
                 <div class='col-6'>
-                    <input type="text" class="form-control " id="validationDefa"
+                    <input type="text" class="form-control " id="password"
                         placeholder="" required name='password' form='mainform'>
                 </div>
             </div>
 
-            <div class=" mb-3  row">
-                <label for="validationDefault01" class='col-form-label col-2'>Phone Number</label>
-                <div class='col-6'>
-                    <input type="number" class="form-control " id="validationDefault01"
-                        placeholder="xxxxxxxx (no spaces)" required name='phoneNumber' form='mainform'>
-                </div>
-            </div>
+            <input type="submit" class = 'btn btn-primary' value = 'Login' form = 'mainform'>            
 
+        
 
         </div>
 
-
-        <h2>Medication </h2>
-
-
-
-
-
-        <div class="form-row ml-2">
-            <div class=" mb-3  row">
-                <label for="validationDefault01" class='col-form-label col-2'>Cylinder 1 : </label>
-                <div class='col-6'>
-                    <input type="text" class="form-control " id="cylinderinput1" placeholder="Name of Medication"
-                        required form='subform' name='cyl1'> 
-                </div>
-
-                <div class = 'col-4'>
-                    <input type="number" class="form-control " id="cylinderinput1" placeholder="Stocks"
-                    required form='stockform' name='cyl1'>
-                </div>
-            </div>
-
-
-            <div class=" mb-3  row">
-                <label for="validationDefault01" class='col-form-label col-2'>Cylinder 2 : </label>
-                <div class='col-6'>
-                    <input type="text" class="form-control " id="cylinderinput2" placeholder="Name of Medication"
-                        required form='subform' name='cyl2'>
-                </div>
-                <div class = 'col-4'>
-                    <input type="number" class="form-control " id="cylinderinput1" placeholder="Stocks"
-                    required form='stockform' name='cyl2'>
-                </div>
-            </div>
-
-
-
-            <div class=" mb-3  row">
-                <label for="validationDefault01" class='col-form-label col-2'>Cylinder 3 : </label>
-                <div class='col-6'>
-                    <input type="text" class="form-control " id="cylinderinput3" placeholder="Name of Medication"
-                        required form='subform' name='cyl3'>
-                </div>
-                <div class = 'col-4'>
-                    <input type="number" class="form-control " id="cylinderinput1" placeholder="Stocks"
-                    required form='stockform' name='cyl3'>
-                </div>
-            </div>
-
-
-            <div class=" mb-3  row">
-                <label for="validationDefault01" class='col-form-label col-2'>Cylinder 4 : </label>
-                <div class='col-6'>
-                    <input type="text" class="form-control " id="cylinderinput4" placeholder="Name of Medication"
-                        required form='subform' name='cyl4'>
-                </div>
-                <div class = 'col-4'>
-                    <input type="number" class="form-control " id="cylinderinput1" placeholder="Stocks"
-                    required form='stockform' name='cyl4'>
-                </div>
-            </div>
-
-            <button class="btn btn-primary" id='submitmainform' type="submit">Submit form</button>
-
-        </div>
-    </div>
-
-
-    </div>
-
-
+<!-- 
     <script>
 
         $(window).on('load', function () {
@@ -200,12 +131,6 @@
                 console.log('------')
 
                 //  axios.post("/config", data)
-                axios.post("/setup", data).then(response=>{
-                    if(response.request){
-                        alert("Setup Successful!")
-                        window.location.href=response.request.responseURL
-                    }
-                })
 
 
 
@@ -248,7 +173,7 @@
 
 
     </script>
-
+ -->
 
 </body>
 

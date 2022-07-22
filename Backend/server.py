@@ -66,6 +66,7 @@ class Users(UserMixin, db.Model):
     password = db.Column(db.String(100), nullable=False)
     number = db.Column(db.String(25), nullable=False)
 
+
 # create db and tables if don't exist
 db.create_all()
 print(Mappings.query.all())
@@ -102,10 +103,6 @@ def setup():
         newMapping2 = Mappings(2, mappingData['cyl2'], int(stockData['cyl2']))
         newMapping3 = Mappings(3, mappingData['cyl3'], int(stockData['cyl3']))
         newMapping4 = Mappings(4, mappingData['cyl4'], int(stockData['cyl4']))
-        # newMapping1 = Mappings.query.filter_by(cylinderNum=1).update(dict(stock=stockData['cyl1'], medicationName=mappingData['cyl1']))
-        # newMapping2 = Mappings.query.filter_by(cylinderNum=2).update(dict(stock=stockData['cyl2'], medicationName=mappingData['cyl2']))
-        # newMapping3 = Mappings.query.filter_by(cylinderNum=3).update(dict(stock=stockData['cyl3'], medicationName=mappingData['cyl3']))
-        # newMapping4 = Mappings.query.filter_by(cylinderNum=4).update(dict(stock=stockData['cyl4'], medicationName=mappingData['cyl4'])) 
         db.session.add(user)
         db.session.add(newMapping1)
         db.session.add(newMapping2)
@@ -136,7 +133,13 @@ def login():
             flash('Please check your login details and try again.')
             return redirect(url_for("login"))
     else:
-        return "login page"
+        users = []
+        for user in Users.query.all():
+            users.append(user.__dict__)
+        if users ==[]:
+            return redirect(url_for('setup'))
+        else:
+            return render_template('login.html')
 
 @app.route("/", methods=["GET"])
 @login_required
@@ -172,42 +175,49 @@ def config():
         
         return render_template('InsertConfig.html', med1=med1, med2=med2, med3=med3, med4=med4)
 
+# @app.route("/settings", methods=["GET", "POST"])
+# @login_required
+# def settings():
+#     if request.method == "POST":
+#         requestData = request.get_json()
+#         phoneNumber = requestData['phoneNumber']
+#         try:
+#             user = Users.query.filter_by(username=current_user.username).update(dict(number=int(phoneNumber)))
+#         except:
+#             flash('Error changing number, please check number and try again.')
+#             return redirect(url_for('settings'))
+#     else:
+
+#         return current_user.number
+
 @app.route("/settings", methods=["GET", "POST"])
-@login_required
-def settings():
-    if request.method == "POST":
-        requestData = request.get_json()
-        phoneNumber = requestData['phoneNumber']
-        try:
-            user = Users.query.filter_by(username=current_user.username).update(dict(number=int(phoneNumber)))
-        except:
-            flash('Error changing number, please check number and try again.')
-            return redirect(url_for('settings'))
-    else:
-
-        return current_user.number
-
-@app.route("/medsettings", methods=["GET", "POST"])
 # @login_required
 def medSettings():
     if request.method == "POST":
-        requestData = request.get_json()
-        dosageData = requestData['dosage']
-        stockData = requestData['stock']
-        mappingData= requestData['mapping']
-        update1 = Mappings.query.filter_by(cylinderNum=1).update(dict(stock=stockData['cyl1'], medicationName=mappingData['cyl1']))
-        update2 = Mappings.query.filter_by(cylinderNum=2).update(dict(stock=stockData['cyl2'], medicationName=mappingData['cyl2']))
-        update3 = Mappings.query.filter_by(cylinderNum=3).update(dict(stock=stockData['cyl3'], medicationName=mappingData['cyl3']))
-        update4 = Mappings.query.filter_by(cylinderNum=4).update(dict(stock=stockData['cyl4'], medicationName=mappingData['cyl4']))
+        try:
+            requestData = request.get_json()
+            phoneNumber = requestData['phoneNumber']
+            dosageData = requestData['dosage']
+            stockData = requestData['stock']
+            mappingData= requestData['mapping']
+            update1 = Mappings.query.filter_by(cylinderNum=1).update(dict(stock=stockData['cyl1'], medicationName=mappingData['cyl1']))
+            update2 = Mappings.query.filter_by(cylinderNum=2).update(dict(stock=stockData['cyl2'], medicationName=mappingData['cyl2']))
+            update3 = Mappings.query.filter_by(cylinderNum=3).update(dict(stock=stockData['cyl3'], medicationName=mappingData['cyl3']))
+            update4 = Mappings.query.filter_by(cylinderNum=4).update(dict(stock=stockData['cyl4'], medicationName=mappingData['cyl4']))
+            update5 = Users.query.filter_by(username=current_user.username).update(dict(number=int(phoneNumber)))
+            db.session.commmit()
+            return {"message": "success"}
 
-        flash("Successfully changed settings")
-        return redirect(url_for('medSettings'))
+        except:
+            return {"message": "error"}
         
     else:
         dosage = Medications.query.all()
-        print(Mappings.query.filter_by(cylinderNum=1).first().stock)
-        
+        print(Users.query.filter_by(username=current_user.username).first().number)
+        phoneNumber=Users.query.filter_by(username=current_user.username).first().number
+
         return render_template("updateConfig.html",
+        phoneNumber=phoneNumber,
         stock1=Mappings.query.filter_by(cylinderNum=1).first().stock,
         stock2=Mappings.query.filter_by(cylinderNum=2).first().stock,
         stock3=Mappings.query.filter_by(cylinderNum=3).first().stock,
@@ -228,7 +238,7 @@ def retrconfig():
 def sendMessage():
     number = Users.query.first().number
     message = ""
-    x = requests.get(f"https://api.callmebot.com/whatsapp.php?phone={number}&text={urllib.parse.quote_plus(message)}&apikey=[your_apikey]")
+    x = requests.get(f"https://api.callmebot.com/whatsapp.php?phone=+65{number}&text={urllib.parse.quote_plus(message)}&apikey=683731")
 
 @app.route("/getstock", methods=["GET"])
 @auth.login_required
