@@ -146,7 +146,7 @@ def main():
     return "Dashboard"
 
 @app.route("/config", methods=["GET", "POST"])
-# @login_required
+@login_required
 def config():
     if request.method == "POST":
         requestData = request.get_json()
@@ -190,7 +190,7 @@ def config():
 #         return current_user.number
 
 @app.route("/settings", methods=["GET", "POST"])
-# @login_required
+@login_required
 def medSettings():
     if request.method == "POST":
         try:
