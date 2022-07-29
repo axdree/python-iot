@@ -35,28 +35,54 @@
         <h1>Settings</h1>
 
         <form onsubmit='return false ' id='mainform'> </form>
+
+
         <form id="subform"> </form>
-        <form id = 'stockform'></form>
+
+        <div id='timeforms'>
+            {% for dose in data %}
+            <form id="timeform{{ dose['id'] }}" value = "cyl{{dose['id']}}"> </form>
 
 
-        <div class = 'mb-3'>
+            {% endfor %}
+        </div>
+
+
+        <form id="dosageform"> </form>
+
+
+
+
+
+
+
+        <form id='stockform'></form>
+
+
+
+        <div class='mb-3'>
             <label for="validationDefault01" class='col-form-label col-2'>Phone Number</label>
             <div class='col-6'>
-                <input type="number" class="form-control " id="validationDefault01"
-                    placeholder="{{phoneNumber}}" required name='phoneNumber' form='mainform' value = '{{phoneNumber}}'>
+                <input type="number" class="form-control " id="validationDefault01" placeholder="{{phoneNumber}}"
+                    required name='phoneNumber' form='mainform' value='{{phoneNumber}}'>
             </div>
         </div>
 
         <h2 class="pt-5">Current Medications</h2>
         {{cylinder}}
         {% for dose in data %}
+        <div class='onemed'>
 
             <h4>Medication ID: {{dose['id']}}</h4>
             {{dose['timings']}}
+            <button class='btn btn-danger removemed' value = "cyl{{ dose['id'] }}">
+                Remove id {{ dose['id'] }}
+            </button>
 
             <div class="col-md-4 mb-3">
                 <label for="validationDefault02">Medication</label>
-                <select class="form-select" aria-label="Default select example" name ='medication' form = 'mainform' >
+                <select class="form-select" aria-label="Default select example" name='medication'
+                    form="timeform{{ dose['id'] }}" >
                     {% for cyl in cylinder%}
                     {% if dose['cylinderNum'] == cyl %}
                     <option value="{{ cylinder[cyl] }}" selected>{{ cylinder[cyl] }}</option>
@@ -65,34 +91,37 @@
                     {% endif %}
                     {% endfor %}
                 </select>
-            </div> 
-            
+            </div>
+
             <div class="container">
                 <div class="col-md-6 mb-3" class='timing'>
                     <label for="validationDefault03">Timing</label>
-                    {% for time in dose['timings'] %}
-                    <div class = 'd-flex mt-2'>
-                        <input class='form-control' type="time" id="appt" name="appt" step=1800
-                            required form = 'subform' value="{{time}}">
-                         <button class = 'delbutton'>
-                             <span class= 'svg'>
-                                    <svg  xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-                                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                                      </svg>
-                             </span>
-                         </button>
-                   </div>
-                   {% endfor %}
+                    {% for i, time in enumerate(dose['timings']) %}
+                    <div class='d-flex mt-2'>
+                        <input class='form-control' type="time" id="appt" name="time" step=1800 required
+                            form="timeform{{ dose['id'] }}" value="{{time}}">
+                        <button class='delbutton'>
+                            <span class='svg'>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
+                                    class="bi bi-x" viewBox="0 0 16 16">
+                                    <path
+                                        d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                                </svg>
+                            </span>
+                        </button>
+                    </div>
+                    {% endfor %}
                 </div>
                 <div class='d-flex pt-2'>
-                    <button type="button" class="btn btn-primary buttonadd">Add Timing</button>
+                    <button type="button" class="btn btn-primary buttonadd" value = "{{dose['id']}}">Add Timing</button>
                 </div>
             </div>
-            
+
 
             <div class="col-md-4 mb-3">
                 <label class="form-check-label" for="exampleCheck1">Dose</label>
-                <input type="number" class="form-control" id="exampleCheck1" min = '1' name ='dose'  form = 'mainform' value="{{dose['dosage']}}">
+                <input type="number" class="form-control" id="exampleCheck1" min='1' name='cyl{{dose["id"]}}'
+                    form="dosageform" value="{{dose['dosage']}}">
             </div>
 
             {{dose['cylinderNum']}}
@@ -105,6 +134,7 @@
             {{cylinder[dose['cylinderNum']]}}
             <br>
             <br><br>
+        </div>
         {% endfor %}
 
 
@@ -236,6 +266,7 @@
 
             }
             $("body").on('click', 'button.delbutton', (event) => {
+               
                 $(event.currentTarget).parent().remove()
             })
             var counter = 0
@@ -243,10 +274,10 @@
 
             $(".buttonadd").click((e) => {
                 console.log('click');
-                console.log($(event.currentTarget).parent().html())
-                $(event.currentTarget).parent().append(`<div class = 'd-flex mt-2'>
-                            <input class='form-control' type="time" id="appt" name="appt${++counter}" step=1800
-                                required form = 'subform'>
+                console.log($(event.currentTarget).parent().siblings('.timings').html())
+                $(event.currentTarget).parent().siblings().append(`<div class = 'd-flex mt-2'>
+                            <input class='form-control' type="time" id="appt" name="time" step=1800
+                                required form = 'timeform${$(event.currentTarget).val()}'>
                              <button class = 'delbutton'>
                                  <span class= 'svg'>
                                         <svg  xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
@@ -261,31 +292,78 @@
 
             })
 
+            $('.removemed').click((e) => {
+                console.log( 'to remove' , $('#timeforms').find(`[value='${$(event.currentTarget).attr('value')}']`))
+                $('#timeforms').find(`[value='${$(event.currentTarget).attr('value')}']`).remove()
+                                $(event.currentTarget).parent().remove()
+
+            })
+
 
             $('#submitform').click(() => {
 
- 
-                
-                var formdata = new FormData(document.querySelector('#subform'))
-    
-                var subformdata = new FormData(document.querySelector('#stockform'))
-
-                var mainform = new FormData(document.querySelector('#mainform'))
-
-        
 
 
-                var data = {
-                    'stock' : Object.fromEntries(formdata.entries()),
-                    'mapping' : Object.fromEntries(subformdata.entries()),
-                    'dosage' : [],//add the dosage here,
-                    'phoneNumber' : Object.fromEntries(mainform.entries())['phoneNumber']
+                //var length = {{ data | length}}
+
+
+
+                var children = document.querySelector('#timeforms').children
+                var alltimes = {}
+                var allmedication = {}
+                for (var i = 0 ; i < children.length ; i++){
+                    child = children[i]
+                    console.log($(child).attr('value'))
+                    var form = new FormData(child)
+                    var times = form.getAll('time')
+                    var medication = form.get('medication')
+
+                    alltimes[$(child).attr('value')] = times
+                    allmedication[$(child).attr('value')] = medication
 
                 }
-                
 
-                console.log(data)
-                axios.post("/config", data)
+
+
+
+                var stock = new FormData(document.querySelector('#stockform'));
+
+
+
+
+
+                var mainform = new FormData(document.querySelector(`#mainform`))
+
+                var mapping = new FormData(document.querySelector(`#subform`))
+
+
+                var dosage = new FormData(document.querySelector('#dosageform'))
+
+
+
+
+                var dosageobj = []
+                var keys = Object.keys(alltimes)
+                for (var i = 0 ; i < keys.length ; i++ ){
+                    var cyl  = keys[i]
+                    dosageobj.push({'timings' : alltimes[cyl] , 'medication' : allmedication[cyl] , 'dose' :  Object.fromEntries(dosage.entries())[cyl] })
+                }
+                console.log(dosageobj)
+
+                var data = {
+                    'stock': Object.fromEntries(stock.entries()),
+                    'mapping': Object.fromEntries(mapping.entries()),
+                    'dosage': dosageobj,//add the dosage here,
+                    'phoneNumber': Object.fromEntries(mainform.entries())['phoneNumber']//,
+               //     'timings': alltimes
+                }
+
+
+
+
+
+                console.log(JSON.stringify(data))
+           //     axios.post("/config", data)
 
 
 

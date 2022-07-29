@@ -15,7 +15,7 @@ login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.init_app(app)
 
-# Authentication credentials for raspberry on basic http auth endpoint. In ideal situation we would be using a CA but this project is on LAN
+# Authentication credentials for raspberry on basic http auth endpoint. In ideal situation we would be using a CA but for simplicity we assume this project is on LAN
 USERNAME = "pythoniot"
 PASSWORD = "sha256$L2gFoqDlw7dyQapp$fda2cf4d5843b98553e8eff1da76064547bf35e704e213ea99c8bc29da928992"
 
@@ -56,30 +56,21 @@ class Mappings(db.Model):
 
 class Users(UserMixin, db.Model):
     __tablename__= 'users'
-    def __init__(self, username, password, number):
+    def __init__(self, username, password, number, apikey):
         self.username = username
         self.password = password
         self.number = number
+        self.apikey = apikey
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     number = db.Column(db.String(25), nullable=False)
+    apikey = db.Column(db.String(10), nullable=True)
 
 # create db and tables if don't exist
 db.create_all()
 print(Mappings.query.all())
-
-# User creation for testing purposes
-# user = Users(username="test", password=generate_password_hash("password"), number="90202365")
-# db.session.add(user)
-# db.session.commit()
-
-# temp = Mappings(1,"ibuprofen")
-# temp2 = Mappings(2, "paracetamol")
-# db.session.add(temp)
-# db.session.add(temp2)
-# db.session.commit()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -96,8 +87,11 @@ def setup():
         phoneNumber = requestData['phoneNumber']
         mappingData = requestData['mappings']
         stockData = requestData['stocks']
+        apikey = requestData['apikey']
+        if apikey == "":
+            apikey = "000000"
 
-        user = Users(username=uname, password=generate_password_hash(pword), number=phoneNumber)
+        user = Users(username=uname, password=generate_password_hash(pword), number=phoneNumber, apikey=apikey)
         newMapping1 = Mappings(1, mappingData['cyl1'], int(stockData['cyl1']))
         newMapping2 = Mappings(2, mappingData['cyl2'], int(stockData['cyl2']))
         newMapping3 = Mappings(3, mappingData['cyl3'], int(stockData['cyl3']))
@@ -174,21 +168,6 @@ def config():
         
         return render_template('InsertConfig.html', med1=med1, med2=med2, med3=med3, med4=med4)
 
-# @app.route("/settings", methods=["GET", "POST"])
-# @login_required
-# def settings():
-#     if request.method == "POST":
-#         requestData = request.get_json()
-#         phoneNumber = requestData['phoneNumber']
-#         try:
-#             user = Users.query.filter_by(username=current_user.username).update(dict(number=int(phoneNumber)))
-#         except:
-#             flash('Error changing number, please check number and try again.')
-#             return redirect(url_for('settings'))
-#     else:
-
-#         return current_user.number
-
 @app.route("/settings", methods=["GET", "POST"])
 @login_required
 def medSettings():
@@ -198,7 +177,10 @@ def medSettings():
             phoneNumber = requestData['phoneNumber']
             dosageData = requestData['dosage']
             stockData = requestData['stock']
-            mappingData= requestData['mapping']
+            mappingData = requestData['mapping']
+            for idx, dose in enumerate(dosageData):
+                query = Mappings.query.filter_by(medicationName=dose['medication']).first().cylinderNum
+                update6 = Medications.query.all()[idx].update(dict(cylinderNum=query, timings=dose['timings'], dose=dose['dose']))
             update1 = Mappings.query.filter_by(cylinderNum=1).update(dict(stock=stockData['cyl1'], medicationName=mappingData['cyl1']))
             update2 = Mappings.query.filter_by(cylinderNum=2).update(dict(stock=stockData['cyl2'], medicationName=mappingData['cyl2']))
             update3 = Mappings.query.filter_by(cylinderNum=3).update(dict(stock=stockData['cyl3'], medicationName=mappingData['cyl3']))
@@ -206,8 +188,8 @@ def medSettings():
             update5 = Users.query.filter_by(username=current_user.username).update(dict(number=int(phoneNumber)))
             db.session.commmit()
             return {"message": "success"}
-
         except:
+            print("error3")
             return {"message": "error"}
         
     else:
@@ -239,14 +221,20 @@ def medSettings():
 @app.route("/retrconfig", methods=["GET"])
 @auth.login_required
 def retrconfig():
-    data = Medications.query.all()
+    dosage = Medications.query.all()
+    data = [i.__dict__ for i in dosage]
+    return data
 
 @app.route("/sendmessage", methods=["POST"])
 @auth.login_required
 def sendMessage():
     number = Users.query.first().number
-    message = ""
-    x = requests.get(f"https://api.callmebot.com/whatsapp.php?phone=+65{number}&text={urllib.parse.quote_plus(message)}&apikey=683731")
+    apikey = Users.query.first().apikey
+    message = request.args.get('message')
+    if apikey == "000000":
+        return {"No apikey found"}
+    else:
+        x = requests.get(f"https://api.callmebot.com/whatsapp.php?phone=+65{number}&text={urllib.parse.quote_plus(message)}&apikey={apikey}")
 
 @app.route("/getstock", methods=["GET"])
 @auth.login_required
@@ -259,10 +247,14 @@ def getStock():
     }
     return stock
 
-@app.route("/updateStock", methods=["GET"])
+@app.route("/lowerStock", methods=["POST"])
 @auth.login_required
 def updateStock():
-    pass
+    cylinder = request.args.get('cyl')
+    currentStock = int(Mappings.query.filter_by(cylinderNum=cylinder).first().stock)
+    update = Mappings.query.filter_by(cylinderNum=cylinder).update(dict(stock=currentStock-1))
+    db.session.commit()
+    return {"message":"success"}
 
 if __name__ == "__main__":
     app.run(debug=True, port=1234)
