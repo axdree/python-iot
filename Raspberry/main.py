@@ -104,6 +104,7 @@ def cycleWrapper(data):
         dispensed = cycle(data)
         cycleCount += 1
     if not dispensed:
+        print("Thinkspeak - not dispensed not taken")
         requests.post(f"http://127.0.0.1:1234/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20dispensed%201%20hour%20after%20scheduled%20time%21", auth=(USERNAME,PASSWORD))
     else:
         takenTimerCount = 0
@@ -115,9 +116,10 @@ def cycleWrapper(data):
                 time.sleep(1)
                 takenTimerCount += 1
         if not medTaken:
+            print("Thinkspeak - dispensed not taken")
             requests.post(f"http://127.0.0.1:1234/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20taken%201%20hour%20after%20dispensed%20time%21", auth=(USERNAME,PASSWORD))
         else:
-            print("Thinkspeak")
+            print("Thinkspeak - dispensed and taken")
 
 def main():
     try:
