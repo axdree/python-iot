@@ -69,14 +69,12 @@
         </div>
 
         <h2 class="pt-5">Current Medications</h2>
-        {{cylinder}}
         {% for dose in data %}
         <div class='onemed'>
 
             <h4>Medication ID: {{dose['id']}}</h4>
-            {{dose['timings']}}
             <button class='btn btn-danger removemed' value = "cyl{{ dose['id'] }}">
-                Remove id {{ dose['id'] }}
+                Remove medication {{ dose['id'] }}
             </button>
 
             <div class="col-md-4 mb-3">
@@ -124,14 +122,6 @@
                     form="dosageform" value="{{dose['dosage']}}">
             </div>
 
-            {{dose['cylinderNum']}}
-            {{dose['dosage']}}
-            <br>
-            {% for time in dose['timings']%}
-            {{time}}
-            {% endfor %}
-            <br>
-            {{cylinder[dose['cylinderNum']]}}
             <br>
             <br><br>
         </div>
@@ -363,7 +353,14 @@
 
 
                 console.log(JSON.stringify(data))
-           //     axios.post("/config", data)
+                axios.post("/settings", data).then(response=>{
+                    if(response.data.message=="success"){
+                        alert("Update successful")
+                        window.location.reload()
+                    }else{
+                        alert("Update error")
+                    }
+                })
 
 
 

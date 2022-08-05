@@ -17,6 +17,7 @@ login_manager.init_app(app)
 
 # Authentication credentials for raspberry on basic http auth endpoint. In ideal situation we would be using a CA but for simplicity we assume this project is on LAN
 USERNAME = "pythoniot"
+#P@$$w0rd
 PASSWORD = "sha256$L2gFoqDlw7dyQapp$fda2cf4d5843b98553e8eff1da76064547bf35e704e213ea99c8bc29da928992"
 
 # http authentication
@@ -178,18 +179,22 @@ def medSettings():
             dosageData = requestData['dosage']
             stockData = requestData['stock']
             mappingData = requestData['mapping']
-            for idx, dose in enumerate(dosageData):
+            db.session.query(Medications).delete()
+            db.session.commit()
+            for dose in dosageData:
                 query = Mappings.query.filter_by(medicationName=dose['medication']).first().cylinderNum
-                update6 = Medications.query.all()[idx].update(dict(cylinderNum=query, timings=dose['timings'], dose=dose['dose']))
+                tmp = Medications(cylinderNum=query, timings=dose['timings'], dosage=dose['dose'])
+                db.session.add(tmp)
+                db.session.commit()
             update1 = Mappings.query.filter_by(cylinderNum=1).update(dict(stock=stockData['cyl1'], medicationName=mappingData['cyl1']))
             update2 = Mappings.query.filter_by(cylinderNum=2).update(dict(stock=stockData['cyl2'], medicationName=mappingData['cyl2']))
             update3 = Mappings.query.filter_by(cylinderNum=3).update(dict(stock=stockData['cyl3'], medicationName=mappingData['cyl3']))
             update4 = Mappings.query.filter_by(cylinderNum=4).update(dict(stock=stockData['cyl4'], medicationName=mappingData['cyl4']))
             update5 = Users.query.filter_by(username=current_user.username).update(dict(number=int(phoneNumber)))
-            db.session.commmit()
+            db.session.commit()
             return {"message": "success"}
-        except:
-            print("error3")
+        except Exception as e:
+            print(e)
             return {"message": "error"}
         
     else:
@@ -215,7 +220,9 @@ def medSettings():
         mapping1=Mappings.query.filter_by(cylinderNum=1).first().medicationName,
         mapping2=Mappings.query.filter_by(cylinderNum=2).first().medicationName,
         mapping3=Mappings.query.filter_by(cylinderNum=3).first().medicationName,
-        mapping4=Mappings.query.filter_by(cylinderNum=4).first().medicationName)
+        mapping4=Mappings.query.filter_by(cylinderNum=4).first().medicationName,
+        zip=zip,
+        enumerate=enumerate)
 
 # Endpoint for raspberry
 @app.route("/retrconfig", methods=["GET"])
@@ -223,7 +230,9 @@ def medSettings():
 def retrconfig():
     dosage = Medications.query.all()
     data = [i.__dict__ for i in dosage]
-    return data
+    for i in data:
+        del i['_sa_instance_state']
+    return {"data":str(data)}
 
 @app.route("/sendmessage", methods=["POST"])
 @auth.login_required
