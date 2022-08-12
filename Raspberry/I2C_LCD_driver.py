@@ -1,4 +1,4 @@
-# -- coding: utf-8 --
+# -*- coding: utf-8 -*-
 # Original code found at:
 # https://gist.github.com/DenisFromHR/cc863375a6e19dce359d
 
@@ -19,13 +19,13 @@ Made available under GNU GENERAL PUBLIC LICENSE
 I2CBUS = 1
 
 # LCD Address
-ADDRESS = 0x53
+ADDRESS = 0x27
 
 import smbus
 from time import sleep
 
 class i2c_device:
-   def _init_(self, addr, port=I2CBUS):
+   def __init__(self, addr, port=I2CBUS):
       self.addr = addr
       self.bus = smbus.SMBus(port)
 
@@ -105,7 +105,7 @@ Rs = 0b00000001 # Register select bit
 
 class lcd:
    #initializes objects and lcd
-   def _init_(self):
+   def __init__(self):
       self.lcd_device = i2c_device(ADDRESS)
 
       self.lcd_write(0x03)
@@ -175,4 +175,5 @@ class lcd:
       self.lcd_write(0x40);
       for char in fontdata:
          for line in char:
-            self.lcd_write_char(line)
+            self.lcd_write_char(line)         
+         

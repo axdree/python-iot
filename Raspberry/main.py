@@ -4,9 +4,11 @@ import time, requests, json, schedule, threading
 from ast import literal_eval
 
 GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
 GPIO.setup(18, GPIO.OUT)
 GPIO.setup(23, GPIO.OUT)
 GPIO.setup(17,GPIO.IN ,pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(26, GPIO.OUT)
 servo = GPIO.PWM(26,50)
 servo.start(5)
 
@@ -22,8 +24,9 @@ def motion(channel):
 GPIO.add_event_detect(17, GPIO.RISING, callback=motion)
 
 def LCDdisplay(msg):
-    mylcd = I2C_LCD_driver.lcd()
-    mylcd.lcd_display_string(msg , 1,1)
+    lcd = I2C_LCD_driver.lcd()
+    lcd.backlight(1)
+    lcd.lcd_display_string(msg, 1)
 
 def buzz(duration):
     PWM = GPIO.PWM(18,100) #set 100Hz PWM output at GPIO 18
@@ -124,7 +127,6 @@ def cycleWrapper(data):
 def main():
     try:
         configResp = requests.get("http://127.0.0.1:1234/retrconfig", auth=(USERNAME,PASSWORD))
-        stock = requests.get("http://127.0.0.1:1234/getstock", auth=(USERNAME,PASSWORD)).json()
     except Exception as e:
         print(f"Error: {e}")
         LCDdisplay("No Connection")
@@ -155,5 +157,5 @@ def main():
 
     startSchedule()
 
-if "__name__" == "__main__":
+if __name__ == "__main__":
     main()
