@@ -4,7 +4,7 @@ from flask_httpauth import HTTPBasicAuth
 from flask_login import LoginManager, login_required, UserMixin, login_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import time, os, requests, urllib.parse, json
-
+ 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
