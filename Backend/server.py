@@ -15,7 +15,7 @@ login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.init_app(app)
 
-# Authentication credentials for raspberry on basic http auth endpoint. In ideal situation we would be using a CA but for simplicity we assume this project is on LAN
+# Authentication credentials for raspberry pi on basic http auth endpoint. In ideal situation we would be using a CA but for simplicity we assume this project is on LAN
 USERNAME = "pythoniot"
 #P@$$w0rd
 PASSWORD = "sha256$L2gFoqDlw7dyQapp$fda2cf4d5843b98553e8eff1da76064547bf35e704e213ea99c8bc29da928992"
