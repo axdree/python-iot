@@ -4,9 +4,11 @@ import time, requests, json, schedule, threading
 from ast import literal_eval
 from datetime import datetime
 GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
 GPIO.setup(18, GPIO.OUT)
 GPIO.setup(23, GPIO.OUT)
 GPIO.setup(17,GPIO.IN ,pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(26, GPIO.OUT)
 servo = GPIO.PWM(26,50)
 servo.start(5)
 
@@ -18,12 +20,16 @@ medTaken = False
 
 def motion(channel):
     global medTaken
-    medTaken = True
+    if GPIO.input(17):
+        medTaken = True
+    else:
+        pass
 GPIO.add_event_detect(17, GPIO.RISING, callback=motion)
 
 def LCDdisplay(msg):
-    mylcd = I2C_LCD_driver.lcd()
-    mylcd.lcd_display_string(msg , 1,1)
+    lcd = I2C_LCD_driver.lcd()
+    lcd.backlight(1)
+    lcd.lcd_display_string(msg, 1)
 
 def buzz(duration):
     PWM = GPIO.PWM(18,100) #set 100Hz PWM output at GPIO 18
@@ -35,7 +41,7 @@ def dispense(qty):
     for i in range(qty):
         time.sleep(1)
         GPIO.output(23,1)
-        time.sleep(0.2)
+        time.sleep(0.5)
         GPIO.output(23,0)
 
 def read_key_pad():
@@ -69,45 +75,53 @@ def read_key_pad():
         if text != '':
             keyPressed = True
 
-servo_range=[3,8,16,24]
+servo_range=[3,7,10,16]
 def rotate(cyl):
     servo.start(servo_range[cyl-1])
-    time.sleep(1)
+    time.sleep(3)
 
 def startSchedule():
+    print("Waiting for schedule to hit")
     while True:
         schedule.run_pending()
         time.sleep(60) # wait one minute
 
 def cycle(data):
+    print("cycle1")
     global keyPressed
     keyPressed = False
     timeElapsed = 0
-    while timeElapsed < 300 and not keyPressed:
+    while timeElapsed < 300:
         if keyPressed:
             for medication in data:
-                requests.post('')
                 rotate(int(medication['cylinder']))
                 dispense(int(medication['dose']))
-                requests.post(f'http://127.0.0.1:1234/lowerstock?cyl={medication["cylinder"]}', auth=(USERNAME,PASSWORD))
+                requests.post(f'http://development.andreyap.com:7631/lowerStock?cyl={medication["cylinder"]}&qty={medication["dose"]}', auth=(USERNAME,PASSWORD))
                 time.sleep(1)
             keyPressed = False
             return True
         else:
             time.sleep(1)
+            timeElapsed += 1
     return False
 
-def cycleWrapper(data , time):
+def cycleWrapper(data, time):
+    global medTaken
+    print("cycleStarted")
+    LCDdisplay("Press 0 to Disp")
+    buzz(1)
     dispensed = cycle(data)
     cycleCount = 1
     while not dispensed and cycleCount < 12:
+        buzz(1)
         dispensed = cycle(data)
         cycleCount += 1
     if not dispensed:
         print("Thinkspeak - not dispensed not taken")
         requests.get(f'https://api.thingspeak.com/update?api_key=9BXAQHAYAJLR8FW9&field1={datetime.now().strftime("%d/%m/%Y")}&field2={time}&field3=0')
-        
-       # requests.post(f"http://127.0.0.1:1234/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20dispensed%201%20hour%20after%20scheduled%20time%21", auth=(USERNAME,PASSWORD))
+
+        requests.post(f"http://127.0.0.1:1234/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20dispensed%201%20hour%20after%20scheduled%20time%21", auth=(USERNAME,PASSWORD))
+  
     else:
         takenTimerCount = 0
         while not medTaken and takenTimerCount < 3600:
@@ -119,18 +133,17 @@ def cycleWrapper(data , time):
                 takenTimerCount += 1
         if not medTaken:
             print("Thinkspeak - dispensed not taken")
+            requests.post(f"http://development.andreyap.com:7631/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20taken%201%20hour%20after%20dispensed%20time%21", auth=(USERNAME,PASSWORD))
+
             requests.get(f'https://api.thingspeak.com/update?api_key=9BXAQHAYAJLR8FW9&field1={datetime.now().strftime("%d/%m/%Y")}&field2={time}&field3=0')
-
-      #      requests.post(f"http://127.0.0.1:1234/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20taken%201%20hour%20after%20dispensed%20time%21", auth=(USERNAME,PASSWORD))
         else:
+            medTaken = False
             print("Thinkspeak - dispensed and taken")
-            requests.get(f'https://api.thingspeak.com/update?api_key=9BXAQHAYAJLR8FW9&field1={datetime.now().strftime("%d/%m/%Y")}&field2={time}&field3=1')
-
 
 def main():
+    LCDdisplay("")
     try:
-        configResp = requests.get("http://127.0.0.1:1234/retrconfig", auth=(USERNAME,PASSWORD))
-        stock = requests.get("http://127.0.0.1:1234/getstock", auth=(USERNAME,PASSWORD)).json()
+        configResp = requests.get("http://development.andreyap.com:7631/retrconfig", auth=(USERNAME,PASSWORD))
     except Exception as e:
         print(f"Error: {e}")
         LCDdisplay("No Connection")
@@ -138,18 +151,18 @@ def main():
         time.sleep(60)
         quit()
 
-    if configResp:
+    if literal_eval(configResp.json()['data']):
         global configuration
         configuration = literal_eval(configResp.json()['data'])
         for config in configuration:
             for time in config['timings']:
-                if time in config:
+                if time in timeSchedule:
                     timeSchedule[time].append({"cylinder":config['cylinderNum'],"dose":config['dosage']})
                 else:
                     timeSchedule[time] = [{"cylinder":config['cylinderNum'],"dose":config['dosage']}]
     else:
         LCDdisplay("No Config")
-        buzz(5)
+        buzz(3)
         time.sleep(60)
         quit()
 
@@ -158,9 +171,11 @@ def main():
     
 
     for i in timeSchedule:
-        schedule.every().day.at(i).do(cycleWrapper,timeSchedule[i] , i )
+        print(i)
+
+        schedule.every().day.at(i).do(cycleWrapper,timeSchedule[i] , i)
 
     startSchedule()
 
-if "__name__" == "__main__":
+if __name__ == "__main__":
     main()

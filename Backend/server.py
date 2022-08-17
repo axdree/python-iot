@@ -211,7 +211,7 @@ def medSettings():
         print(cylinder)
         phoneNumber=Users.query.filter_by(username=current_user.username).first().number
 
-        return render_template("updateConfig.html",
+        return render_template("updateconfig.html",
         data=data,
         cylinder=cylinder,
         phoneNumber=phoneNumber,
@@ -246,6 +246,7 @@ def sendMessage():
         return {"No apikey found"}
     else:
         x = requests.get(f"https://api.callmebot.com/whatsapp.php?phone=+65{number}&text={urllib.parse.quote_plus(message)}&apikey={apikey}")
+        return {"message sent"}
 
 @app.route("/getstock", methods=["GET"])
 @auth.login_required
@@ -262,11 +263,12 @@ def getStock():
 @auth.login_required
 def updateStock():
     cylinder = request.args.get('cyl')
+    quantity = request.args.get('qty')
     currentStock = int(Mappings.query.filter_by(cylinderNum=cylinder).first().stock)
-    update = Mappings.query.filter_by(cylinderNum=cylinder).update(dict(stock=currentStock-1))
+    update = Mappings.query.filter_by(cylinderNum=cylinder).update(dict(stock=currentStock-int(quantity)))
     db.session.commit()
     return {"message":"success"}
 
 if __name__ == "__main__":
-    app.run(debug=True, port=1234)
+    app.run(debug=False, host="0.0.0.0", port=1234)
 
