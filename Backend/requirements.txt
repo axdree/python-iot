@@ -4,3 +4,7 @@ flask_httpauth
 flask-login
 requests
 marshmallow
+pandas 
+dash 
+pandasql
+dash_bootstrap_components

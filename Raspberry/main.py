@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO
 import I2C_LCD_driver
 import time, requests, json, schedule, threading
 from ast import literal_eval
-
+from datetime import datetime
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(18, GPIO.OUT)
 GPIO.setup(23, GPIO.OUT)
@@ -97,7 +97,7 @@ def cycle(data):
             time.sleep(1)
     return False
 
-def cycleWrapper(data):
+def cycleWrapper(data , time):
     dispensed = cycle(data)
     cycleCount = 1
     while not dispensed and cycleCount < 12:
@@ -105,7 +105,9 @@ def cycleWrapper(data):
         cycleCount += 1
     if not dispensed:
         print("Thinkspeak - not dispensed not taken")
-        requests.post(f"http://127.0.0.1:1234/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20dispensed%201%20hour%20after%20scheduled%20time%21", auth=(USERNAME,PASSWORD))
+        requests.get(f'https://api.thingspeak.com/update?api_key=9BXAQHAYAJLR8FW9&field1={datetime.now().strftime("%d/%m/%Y")}&field2={time}&field3=0')
+        
+       # requests.post(f"http://127.0.0.1:1234/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20dispensed%201%20hour%20after%20scheduled%20time%21", auth=(USERNAME,PASSWORD))
     else:
         takenTimerCount = 0
         while not medTaken and takenTimerCount < 3600:
@@ -117,9 +119,13 @@ def cycleWrapper(data):
                 takenTimerCount += 1
         if not medTaken:
             print("Thinkspeak - dispensed not taken")
-            requests.post(f"http://127.0.0.1:1234/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20taken%201%20hour%20after%20dispensed%20time%21", auth=(USERNAME,PASSWORD))
+            requests.get(f'https://api.thingspeak.com/update?api_key=9BXAQHAYAJLR8FW9&field1={datetime.now().strftime("%d/%m/%Y")}&field2={time}&field3=0')
+
+      #      requests.post(f"http://127.0.0.1:1234/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20taken%201%20hour%20after%20dispensed%20time%21", auth=(USERNAME,PASSWORD))
         else:
             print("Thinkspeak - dispensed and taken")
+            requests.get(f'https://api.thingspeak.com/update?api_key=9BXAQHAYAJLR8FW9&field1={datetime.now().strftime("%d/%m/%Y")}&field2={time}&field3=1')
+
 
 def main():
     try:
@@ -149,9 +155,10 @@ def main():
 
     keypadThread = threading.Thread(target=read_key_pad)
     keypadThread.start()
+    
 
     for i in timeSchedule:
-        schedule.every().day.at(i).do(cycleWrapper,timeSchedule[i])
+        schedule.every().day.at(i).do(cycleWrapper,timeSchedule[i] , i )
 
     startSchedule()
 
