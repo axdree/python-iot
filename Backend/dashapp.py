@@ -26,24 +26,18 @@ def return_dash_app(flaskapp):
         [
             dbc.NavbarSimple(
                 children=[
-                    dbc.NavItem(dbc.NavLink("Home", href="http://localhost:1234")),
-                    dbc.NavItem(
-                        dbc.NavLink("Setup", href="http://localhost:1234/setup")
-                    ),
+                    dbc.NavItem(dbc.NavLink("Dashboard", href="http://localhost:1234")),
                     dbc.NavItem(
                         dbc.NavLink(
-                            "Insert Configuration", href="http://localhost:1234/config"
-                        )
-                    ),
-                    dbc.NavItem(
-                        dbc.NavLink(
-                            "Update Configuration",
+                            "Settings",
                             href="http://localhost:1234/settings",
                         )
                     ),
                     dbc.NavItem(
-                        dbc.NavLink("login", href="http://localhost:1234/login")
-                    ),
+                        dbc.NavLink(
+                            "Add Medication", href="http://localhost:1234/config"
+                        )
+                    )
                 ],
                 brand="Pill Dispenser",
                 brand_href="#",
@@ -117,9 +111,15 @@ def return_dash_app(flaskapp):
 
         return (
             fig,
-            f"The Patient is most likely to miss doses for {frame.groupby('time of day')['taken'].sum().sort_values( ascending = True).index[0] }:00",
+            f"The Patient is most likely to miss doses for {frame.groupby('time of day')['taken'].sum().sort_values( ascending = False).index[0] }:00",
             linefig,
         )
+    
+    for view_function in app1.server.view_functions:
+        if view_function.startswith(app1.config.url_base_pathname):
+            app1.server.view_functions[view_function] = login_required(
+                app1.server.view_functions[view_function]
+            )
 
     return app1
 
