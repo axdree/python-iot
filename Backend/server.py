@@ -4,7 +4,7 @@ from flask_httpauth import HTTPBasicAuth
 from flask_login import LoginManager, login_required, UserMixin, login_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import time, os, requests, urllib.parse, json
- 
+from dashapp import return_dash_app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -122,7 +122,7 @@ def login():
         user = Users.query.filter_by(username=uname).first()
         if user and check_password_hash(user.password, pword):
             login_user(user)
-            return redirect(url_for("main"))
+            return redirect('/')
         else:
             flash('Please check your login details and try again.')
             return redirect(url_for("login"))
@@ -135,10 +135,12 @@ def login():
         else:
             return render_template('login.html')
 
-@app.route("/", methods=["GET"])
-@login_required
-def main():
-    return "Dashboard"
+# @app.route("/", methods=["GET"])
+# @login_required
+# def main():
+#     return "Dashboard"
+return_dash_app( app )
+
 
 @app.route("/config", methods=["GET", "POST"])
 @login_required
