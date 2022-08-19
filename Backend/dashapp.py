@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import dash
 from dash import dcc
 
