@@ -155,11 +155,11 @@ def main():
         global configuration
         configuration = literal_eval(configResp.json()['data'])
         for config in configuration:
-            for time in config['timings']:
-                if time in timeSchedule:
-                    timeSchedule[time].append({"cylinder":config['cylinderNum'],"dose":config['dosage']})
+            for time1 in config['timings']:
+                if time1 in timeSchedule:
+                    timeSchedule[time1].append({"cylinder":config['cylinderNum'],"dose":config['dosage']})
                 else:
-                    timeSchedule[time] = [{"cylinder":config['cylinderNum'],"dose":config['dosage']}]
+                    timeSchedule[time1] = [{"cylinder":config['cylinderNum'],"dose":config['dosage']}]
     else:
         LCDdisplay("No Config")
         buzz(3)
