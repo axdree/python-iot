@@ -117,6 +117,7 @@ def cycleWrapper(data, time2):
         dispensed = cycle(data)
         cycleCount += 1
     LCDdisplay("")
+    medTaken = False
     if not dispensed:
         print("Thinkspeak - not dispensed not taken")
         requests.get(f'https://api.thingspeak.com/update?api_key=9BXAQHAYAJLR8FW9&field1={datetime.now().strftime("%d/%m/%Y")}&field2={time2}&field3=0')
