@@ -120,7 +120,7 @@ def cycleWrapper(data, time):
         print("Thinkspeak - not dispensed not taken")
         requests.get(f'https://api.thingspeak.com/update?api_key=9BXAQHAYAJLR8FW9&field1={datetime.now().strftime("%d/%m/%Y")}&field2={time}&field3=0')
 
-        requests.post(f"http://127.0.0.1:1234/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20dispensed%201%20hour%20after%20scheduled%20time%21", auth=(USERNAME,PASSWORD))
+        requests.post(f"http://development.andreyap.com:7631/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20dispensed%201%20hour%20after%20scheduled%20time%21", auth=(USERNAME,PASSWORD))
   
     else:
         takenTimerCount = 0
