@@ -21,6 +21,67 @@ def return_dash_app(flaskapp):
         url_base_pathname="/",
         external_stylesheets=[dbc.themes.BOOTSTRAP],
     )
+    
+    card_content1 = [
+    dbc.CardHeader("Cylinder 1 Stocks"),
+    dbc.CardBody(
+        [
+            html.H5("", className="card-title" , id = 'cyl1')
+        ]
+    ),
+    ]
+    
+    card_content2 = [
+    dbc.CardHeader("Cylinder 2 Stocks"),
+    dbc.CardBody(
+        [
+            html.H5("", className="card-title" , id = 'cyl2')
+        ]
+    ),
+    ]
+    
+    
+    card_content3 = [
+    dbc.CardHeader("Cylinder 3 Stocks"),
+    dbc.CardBody(
+        [
+            html.H5("", className="card-title" , id = 'cyl3')
+        ]
+    ),
+    ]
+    
+    card_content4 = [
+    dbc.CardHeader("Cylinder 4 Stocks"),
+    dbc.CardBody(
+        [
+            html.H5("", className="card-title" , id = 'cyl4')
+        ]
+    ),
+    ]
+    
+    
+    
+    
+    
+    
+    
+    
+    cards = html.Div(
+    [
+        dbc.Row(
+            [
+                dbc.Col(dbc.Card(card_content1, color="primary", inverse=True)),
+                dbc.Col(
+                    dbc.Card(card_content2, color="primary", inverse=True)
+                ),
+                dbc.Col(dbc.Card(card_content3, color="primary", inverse=True)),
+                dbc.Col(dbc.Card(card_content4, color="primary", inverse=True)),
+
+            ],
+            className="mb-4",
+        )
+    ]
+    )
 
     app1.layout = html.Div(
         [
@@ -45,6 +106,7 @@ def return_dash_app(flaskapp):
                 dark=False
                 #  style  = dict(color = 'black')
             ),
+            cards , 
             # html.H2(
             #     children="Percentage of Doses Taken",
             #     style={
@@ -77,6 +139,10 @@ def return_dash_app(flaskapp):
         Output("pie", "figure"),
         Output("h2text", "children"),
         Output("line", "figure"),
+        Output('cyl1' , 'children'),
+        Output('cyl2' , 'children'),
+        Output('cyl3'  ,'children'),
+        Output('cyl4' , 'children'),
         Input("pie", "figure"),
     )
     def update_line_chart(va):
@@ -108,11 +174,21 @@ def return_dash_app(flaskapp):
             x="date",
             y="proportion of doses taken",
         ).update_layout(title_text='7 day average of Percentage of doses taken', title_x=0.5  , title = dict(font = dict(size = 35)))
-
+    
+        stocks = requests.get('http://localhost:1234/getstock' , auth = ('pythoniot' , 'P@$$w0rd'))
+        stocks = stocks.json()
+        
+        
+    
+        
         return (
             fig,
             f"The Patient is most likely to miss doses for {frame.groupby('time of day')['taken'].sum().sort_values( ascending = False).index[0] }:00",
             linefig,
+            str(stocks['cyl1']) + ' pill(s)', 
+            str(stocks['cyl2'])+ ' pill(s)', 
+            str(stocks['cyl3'])+ ' pill(s)', 
+            str(stocks['cyl4'])+ ' pill(s)' 
         )
     
     for view_function in app1.server.view_functions:

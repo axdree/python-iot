@@ -257,6 +257,7 @@ def getStock():
         "cyl3": Mappings.query.filter_by(cylinderNum=3).first().stock,
         "cyl4": Mappings.query.filter_by(cylinderNum=4).first().stock
     }
+    print(stock)
     return stock
 
 @app.route("/lowerStock", methods=["POST"])
