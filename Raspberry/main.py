@@ -137,6 +137,8 @@ def cycleWrapper(data, time):
             requests.get(f'https://api.thingspeak.com/update?api_key=9BXAQHAYAJLR8FW9&field1={datetime.now().strftime("%d/%m/%Y")}&field2={time}&field3=0')
         else:
             medTaken = False
+            requests.get(f'https://api.thingspeak.com/update?api_key=9BXAQHAYAJLR8FW9&field1={datetime.now().strftime("%d/%m/%Y")}&field2={time}&field3=0')
+
             print("Thinkspeak - dispensed and taken")
 
 def main():
