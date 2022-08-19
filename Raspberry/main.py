@@ -95,7 +95,7 @@ def cycle(data):
             for medication in data:
                 rotate(int(medication['cylinder']))
                 dispense(int(medication['dose']))
-                requests.post(f'http://development.andreyap.com:7631/lowerStock?cyl={medication["cylinder"]}&qty={medication["dose"]}', auth=(USERNAME,PASSWORD))
+                requests.post(f'http://localhost:1234/lowerStock?cyl={medication["cylinder"]}&qty={medication["dose"]}', auth=(USERNAME,PASSWORD))
                 time.sleep(1)
             keyPressed = False
             return True
@@ -120,7 +120,7 @@ def cycleWrapper(data, time2):
     if not dispensed:
         print("Thinkspeak - not dispensed not taken")
         requests.get(f'https://api.thingspeak.com/update?api_key=9BXAQHAYAJLR8FW9&field1={datetime.now().strftime("%d/%m/%Y")}&field2={time2}&field3=0')
-        requests.post(f"http://development.andreyap.com:7631/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20dispensed%201%20hour%20after%20scheduled%20time%21", auth=(USERNAME,PASSWORD))
+        requests.post(f"http://localhost:1234/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20dispensed%201%20hour%20after%20scheduled%20time%21", auth=(USERNAME,PASSWORD))
   
     else:
         takenTimerCount = 0
@@ -133,7 +133,7 @@ def cycleWrapper(data, time2):
                 takenTimerCount += 1
         if not medTaken:
             print("Thinkspeak - dispensed not taken")
-            requests.post(f"http://development.andreyap.com:7631/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20taken%201%20hour%20after%20dispensed%20time%21", auth=(USERNAME,PASSWORD))
+            requests.post(f"http://localhost:1234/sendmessage?message=ALERT%3A%20Medication%20has%20not%20been%20taken%201%20hour%20after%20dispensed%20time%21", auth=(USERNAME,PASSWORD))
             requests.get(f'https://api.thingspeak.com/update?api_key=9BXAQHAYAJLR8FW9&field1={datetime.now().strftime("%d/%m/%Y")}&field2={time2}&field3=0')
         else:
             medTaken = False
@@ -144,7 +144,7 @@ def cycleWrapper(data, time2):
 def main():
     LCDdisplay("")
     try:
-        configResp = requests.get("http://development.andreyap.com:7631/retrconfig", auth=(USERNAME,PASSWORD))
+        configResp = requests.get("http://localhost:1234/retrconfig", auth=(USERNAME,PASSWORD))
     except Exception as e:
         print(f"Error: {e}")
         LCDdisplay("No Connection")
