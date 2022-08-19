@@ -32,10 +32,9 @@ def LCDdisplay(msg):
     lcd.lcd_display_string(msg, 1)
 
 def buzz(duration):
-    PWM = GPIO.PWM(18,100) #set 100Hz PWM output at GPIO 18
-    PWM.start(20)
+    GPIO.output(18,1)
     time.sleep(duration)
-    PWM.stop()
+    GPIO.output(18,0)
 
 def dispense(qty):
     for i in range(qty):
@@ -149,7 +148,7 @@ def main():
     except Exception as e:
         print(f"Error: {e}")
         LCDdisplay("No Connection")
-        buzz(5)
+        buzz(2)
         time.sleep(60)
         quit()
 
@@ -164,7 +163,7 @@ def main():
                     timeSchedule[time1] = [{"cylinder":config['cylinderNum'],"dose":config['dosage']}]
     else:
         LCDdisplay("No Config")
-        buzz(3)
+        buzz(2)
         time.sleep(60)
         quit()
 
