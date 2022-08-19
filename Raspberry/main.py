@@ -84,7 +84,7 @@ def startSchedule():
     print("Waiting for schedule to hit")
     while True:
         schedule.run_pending()
-        time.sleep(60) # wait one minute
+        time.sleep(30) # wait 30s
 
 def cycle(data):
     print("cycle1")
