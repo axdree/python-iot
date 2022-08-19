@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import dash
 from dash import dcc
 
@@ -199,5 +200,3 @@ def return_dash_app(flaskapp):
 
     return app1
 
-
-# The Patient is most likely to miss doses for {frame.groupby('time of day')['taken'].sum().sort_values( ascending = True).index[0] }:00
