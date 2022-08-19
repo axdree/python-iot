@@ -8,7 +8,7 @@ from dashapp import return_dash_app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///db.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///db.sqlite'
 db = SQLAlchemy(app)
 auth = HTTPBasicAuth()
 login_manager = LoginManager()
